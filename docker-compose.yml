@@ -5,7 +5,7 @@ services:
     container_name: db
     ports:
       - "4000:27017"
-    restart: "always"
+    restart: always
   azure-storage:
     image: azure-storage
     build: 
@@ -36,5 +36,3 @@ services:
       - VIDEO_STORAGE_HOST=video-storage
       - VIDEO_STORAGE_PORT=80
     restart: "no"
-
-  

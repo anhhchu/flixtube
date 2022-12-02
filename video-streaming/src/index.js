@@ -1,6 +1,6 @@
 const express = require("express");
 const http = require("http");
-const mongodb = require("mongodb"); 
+const mongodb = require("mongodb");
 const app = express();
 // add environment variable
 if (!process.env.PORT) {
@@ -19,7 +19,6 @@ const HOST = process.env.HOST;
 // config video storage microservices
 const VIDEO_STORAGE_HOST = process.env.VIDEO_STORAGE_HOST;
 const VIDEO_STORAGE_PORT = parseInt(process.env.VIDEO_STORAGE_PORT);
-console.log(`Forwarding video requests to ${VIDEO_STORAGE_HOST}:${VIDEO_STORAGE_PORT}.`);
 
 // config database
 const DBHOST = process.env.DBHOST;
@@ -33,7 +32,7 @@ function main() {
         // retrieve the database that the microservice uses
         const db = client.db(DBNAME);
         // retrieve videosCollection document in DB where metadata is stored
-        const videosCollection = db.collection(videos);
+        const videosCollection = db.collection("videos");
 
         app.get("/video", (req, res) => {
             // specfiy video ID (MongoDB Document ID) as HTTP query parameter
@@ -50,6 +49,7 @@ function main() {
                             return;
                         }
                         // else,find the videoPath based on the videoRecord when forwarding http request to video-storage micro service
+                        console.log(videoRecord.videoPath)
                         const forwardRequest = http.request(
                             {
                                 host: VIDEO_STORAGE_HOST,
@@ -71,9 +71,12 @@ function main() {
                         console.error(err && err.stack || err);
                         // Response code 500 : Internal Server Error
                         res.sendStatus(500);
-                })
-        })
-    })
+                });
+        });
+        app.listen(PORT, () => {
+            console.log("App listening, please load file db/videos.json to mongodb before testing")
+        });
+    });
 }
 // Call main function
 // Start the micro service

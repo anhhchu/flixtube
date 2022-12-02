@@ -1,2 +1,4 @@
 node_modules
 ./*/node_modules
+storage_account_key.txt
+storage_account_name.txt

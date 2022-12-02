@@ -116,6 +116,8 @@ Check and kill running containers
 
 ### 3. Docker Compose
 
+https://docs.docker.com/compose/compose-file/compose-file-v3/
+
 Docker Compose allows us to configure, build, run, and manage multiple containers at the same time.
 
     docker-compose --version
@@ -126,19 +128,41 @@ Invoke docker-compose file to build and launch application
 
 The `up` command causes Docker Compose to boot our microservices application. The `--build` argument makes Docker Compose build each of our images before instantiating containers from these 
 
+Stop docker container
+
+    docker-compose stop
+
 Remove docker container
 
     docker-compose down
+
+### 4. Add sercret using Docker Swarm Stack
+
+https://www.rockyourcode.com/using-docker-secrets-with-docker-compose/
+
+    docker swarm init
+
+    printf "anhtestvideos" | docker secret create storage_account_name - 
+
+    docker secret inspect storage_account_name 
 
 
 
 ## Work with Database and Storage
 
-### 1. Install `mongodb`
+### 1. Install `mongodb` in video-streaming microservice
     
     npm install --save mongodb
 
-### 2. 
+### 2. Run docker-compose to start all services
+
+### 3. connect to mongodb on host:4000
+create video-streaming db, videos collection
+add video-record
+
+### 4. check video-streaming localhost
+
+    http://localhost:4002/video?id=5d9e690ad76fe06a3d7ae416
 
 
 
