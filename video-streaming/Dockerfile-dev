@@ -1,0 +1,9 @@
+# Sets the base image for our new image. Alpine is a lightweight Linux distribution that includes only the bare minimum,
+FROM node:12.18.1-alpine 
+# working directory on Docker image
+WORKDIR /usr/src/app 
+COPY package*.json ./
+#  sets the command that is invoked when our container is instantiated.
+CMD npm config set cache-min 9999999 && \
+    npm install && \
+    npm run start:dev  

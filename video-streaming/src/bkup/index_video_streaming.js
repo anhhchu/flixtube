@@ -14,7 +14,7 @@ app.get("/video", (req, res) => {
     const path = "./videos/big_buck_bunny_240p_30mb.mp4";
     fs.stat(path, (err, stats) => {
         if (err) {
-            console.error("An error occurred");
+            console.error("Video file not found");
             res.sendStatus(500);
             return;
         }

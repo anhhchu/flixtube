@@ -7,5 +7,6 @@ COPY package*.json ./
 RUN npm install --only=production
 # copy source code and videos to the image
 COPY ./src ./src 
+# COPY ./videos ./videos
 #  sets the command that is invoked when our container is instantiated.
 CMD npm start

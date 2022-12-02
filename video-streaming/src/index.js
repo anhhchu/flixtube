@@ -1,88 +1,92 @@
 const express = require("express");
+const fs = require("fs");
 const http = require("http");
-const mongodb = require("mongodb");
-const app = express();
-// add environment variable
-if (!process.env.PORT) {
-    throw new Error("Please specify the PORT number");
-};
-if (!process.env.VIDEO_STORAGE_HOST) {
-    throw new Error("Please specify the VIDEO_STORAGE_HOST number");
-};
-if (!process.env.VIDEO_STORAGE_PORT) {
-    throw new Error("Please specify the VIDEO_STORAGE_PORT number");
-};
+const HOST = process.env.HOST
+//
+// Send the "viewed" to the history microservice.
+//
+function sendViewedMessage(videoPath) {
+    const postOptions = { // Options to the HTTP POST request.
+        method: "POST", // Sets the request method as POST.
+        headers: {
+            "Content-Type": "application/json", // Sets the content type for the request's body.
+        },
+    };
 
-const PORT = process.env.PORT;
-const HOST = process.env.HOST;
+    const requestBody = { // Body of the HTTP POST request.
+        videoPath: videoPath 
+    };
 
-// config video storage microservices
-const VIDEO_STORAGE_HOST = process.env.VIDEO_STORAGE_HOST;
-const VIDEO_STORAGE_PORT = parseInt(process.env.VIDEO_STORAGE_PORT);
+    const req = http.request( // Send the "viewed" message to the history microservice.
+        "http://history/viewed",
+        postOptions
+    );
 
-// config database
-const DBHOST = process.env.DBHOST;
-const DBNAME = process.env.DBNAME;
+    req.on("close", () => {
+        console.log("Sent 'viewed' message to history microservice.");
+    });
 
-// --- Main function ---
-function main() {
- // Connect to database server
- return mongodb.MongoClient.connect(DBHOST)
-  .then (client => {
-        // retrieve the database that the microservice uses
-        const db = client.db(DBNAME);
-        // retrieve videosCollection document in DB where metadata is stored
-        const videosCollection = db.collection("videos");
+    req.on("error", (err) => {
+        console.error("Failed to send 'viewed' message!");
+        console.error(err && err.stack || err);
+    });
 
-        app.get("/video", (req, res) => {
-            // specfiy video ID (MongoDB Document ID) as HTTP query parameter
-            const videoId = new mongodb.ObjectID(req.query.id);
-            
-            videosCollection
-                // query database to find the video by requested ID
-                .findOne({_id: videoId})
-                // get the videoRecord from the videoId 
-                .then(videoRecord => {
-                        // if video is not found -> http 404 error
-                        if (!videoRecord) {
-                            res.sendStatus(404);
-                            return;
-                        }
-                        // else,find the videoPath based on the videoRecord when forwarding http request to video-storage micro service
-                        console.log(videoRecord.videoPath)
-                        const forwardRequest = http.request(
-                            {
-                                host: VIDEO_STORAGE_HOST,
-                                port: VIDEO_STORAGE_PORT,
-                                path: `/video?path=${videoRecord.videoPath}`,
-                                method: 'GET',
-                                headers: req.headers
-                            },
-                            forwardResponse => {
-                                res.writeHeader(forwardResponse.statusCode, forwardResponse.headers);
-                                forwardResponse.pipe(res);
-                            }
-                        );
-                        req.pipe(forwardRequest);
-                })
-                // catch Database query error
-                .catch(err => {
-                        console.error("Database query failed.");
-                        console.error(err && err.stack || err);
-                        // Response code 500 : Internal Server Error
-                        res.sendStatus(500);
-                });
-        });
-        app.listen(PORT, () => {
-            console.log("App listening, please load file db/videos.json to mongodb before testing")
+    req.write(JSON.stringify(requestBody)); // Write the body to the request.
+    req.end(); // End the request.
+}
+
+//
+// Setup event handlers.
+//
+function setupHandlers(app) {
+    app.get("/video", (req, res) => { // Route for streaming video.
+
+        const videoPath = "./videos/big_buck_bunny_240p_30mb.mp4";
+        fs.stat(videoPath, (err, stats) => {
+            if (err) {
+                console.error("An error occurred ");
+                res.sendStatus(500);
+                return;
+            }
+    
+            res.writeHead(200, {
+                "Content-Length": stats.size,
+                "Content-Type": "video/mp4",
+            });
+    
+            fs.createReadStream(videoPath).pipe(res);
+
+            sendViewedMessage(videoPath); // Send message to "history" microservice that this video has been "viewed".
         });
     });
 }
-// Call main function
-// Start the micro service
+
+//
+// Start the HTTP server.
+//
+function startHttpServer() {
+    return new Promise(resolve => { // Wrap in a promise so we can be notified when the server has started.
+        const app = express();
+        setupHandlers(app);
+        
+        const port = process.env.PORT && parseInt(process.env.PORT) || 3000;
+        app.listen(port, () => {
+            console.log(`video-streaming listening at http://localhost:${HOST}/video`)
+            resolve();
+        });
+    });
+}
+
+//
+// Application entry point.
+//
+function main() {
+    return startHttpServer();
+}
+
 main()
-    .then(() => console.log("video-streaming microservice online"))
+    .then(() => console.log("Video-streaming Microservice online."))
     .catch(err => {
-        console.error("video-streaming failed to start");
-        console.error(err && err.stack || err)
+        console.error("Video-streaming Microservice failed to start.");
+        console.error(err && err.stack || err);
     });

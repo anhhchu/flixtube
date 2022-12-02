@@ -114,6 +114,10 @@ Check and kill running containers
     docker kill <container-id> 
     docker rm <container-id>
 
+Restart a container
+
+    docker restart <container-name>
+
 ### 3. Docker Compose
 
 https://docs.docker.com/compose/compose-file/compose-file-v3/
@@ -135,6 +139,13 @@ Stop docker container
 Remove docker container
 
     docker-compose down
+
+Run docker-compose with separate files for dev and prod
+
+    docker-compose -f docker-compose-dev.yml up --build
+    docker-compose -f docker-compose-prod.yml up --build
+
+
 
 ### 4. Add sercret using Docker Swarm Stack
 
@@ -165,7 +176,19 @@ add video-record
     http://localhost:4002/video?id=5d9e690ad76fe06a3d7ae416
 
 
+## Communication between microservices
 
+**Direct messaging/Synchronous**: Direct messaging means that one microservice directly sends a message to another microservice and then receives an immediate and direct response. Direct messaging is used when we’d like one microservice to directly message a particular microservice and immediately invoke an action or task within it. The recipient microservice can’t ignore or avoid the incoming message. If it were to do so, the sender will know about it directly from the response.
+* A potential benefit of direct messaging is the ability to have one controller microservice that can orchestrate complex sequences of behavior across multiple other microservices. Because direct messages have a direct response, this allows a single microservice to coordinate or orchestrate the activities of multiple other microservices.
+* It has the major drawback that it requires the tight coupling of the two microservices that are at either end of the communication. Often, we’d prefer to avoid the tight coupling between our microservices, and for that reason, we’ll make frequent use of indirect messaging instead of direct messaging.
+* HTTP: Hypertext Transfer Protocol (HTTP) is used to send direct (or synchronous) messages from one microservice to another.
+
+
+**Indirect message/Asynchronous**: Messages are sent via an intermediary so that both sender and receiver of the messages don’t know which other microservice is involved. In the case of the sender, it doesn’t even know if any other microservice will receive the message at all! Because the receiver doesn’t know which microservice has sent the message, it can’t send a direct reply. This means that this style of communication can’t be applied in situations where a direct response is required for confirming success or failure. This method of communication losely couple the microservices
+
+* RabbitMQ: RabbitMQ is the message queuing software that we’ll use to send indirect (or asynchronous) messages from one microservice to another.
+
+* amqplib: This npm package allows us to configure RabbitMQ and to send and receive messages from JavaScript
 
 
 
