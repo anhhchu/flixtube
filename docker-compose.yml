@@ -31,7 +31,7 @@ services:
     environment:
       - PORT=80
       - HOST=4002
-      - DATABASE-HOST=mongo://db:27017
+      - DBHOST=mongo://db:27017
       - DBNAME=video-streaming
       - VIDEO_STORAGE_HOST=video-storage
       - VIDEO_STORAGE_PORT=80

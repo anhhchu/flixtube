@@ -1,5 +1,5 @@
 ## Work with npm
----
+
 `node --version`: Checks that Node.js is installed; prints the version number.
 
 `npm init -y`: Creates a default Node.js project with a stub for our package.json, the file that tracks metadata and dependencies for our Node.js project.
@@ -42,7 +42,7 @@ When we run npm install `--only=production`, then the packages we install to hel
 
 Run the project in production mode: `npm start` after add `start` to package.json
 
----
+
 ## Work with Docker
 
 ### 1. Docker image
@@ -131,10 +131,14 @@ Remove docker container
     docker-compose down
 
 
----
+
 ## Work with Database and Storage
 
+### 1. Install `mongodb`
+    
+    npm install --save mongodb
 
+### 2. 
 
 
 
