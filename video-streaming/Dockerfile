@@ -1,0 +1,12 @@
+# Sets the base image for our new image. Alpine is a lightweight Linux distribution that includes only the bare minimum,
+FROM node:12.18.1-alpine 
+# working directory on Docker image
+WORKDIR /usr/src/app 
+COPY package*.json ./
+#  Installs only the production dependencies using npm. You can run software within the image during the build process to make changes to the image, install dependencies, and perform other setup tasks
+RUN npm install --only=production
+# copy source code and videos to the image
+COPY ./src ./src 
+# COPY ./videos ./videos
+#  sets the command that is invoked when our container is instantiated.
+CMD npm start
