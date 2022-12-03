@@ -21,7 +21,7 @@ services:
       - PORT=80
       - HOST=4001
       - STORAGE_ACCOUNT_NAME=anhtestvideos
-      - STORAGE_ACCESS_KEY=MGRgfAEFJdYkvpbqF0H7k+awS90v+4FGVBhQg7zGfsVlzxBdeV6Kfr+VMrf+uWx2EcRsx4CHm0RW+ASthP9uMQ==
+      - STORAGE_ACCESS_KEY=
       - NODE-ENV=development
     restart: "no"
   video-streaming:

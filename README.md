@@ -180,15 +180,33 @@ add video-record
 
 **Direct messaging/Synchronous**: Direct messaging means that one microservice directly sends a message to another microservice and then receives an immediate and direct response. Direct messaging is used when we’d like one microservice to directly message a particular microservice and immediately invoke an action or task within it. The recipient microservice can’t ignore or avoid the incoming message. If it were to do so, the sender will know about it directly from the response.
 * A potential benefit of direct messaging is the ability to have one controller microservice that can orchestrate complex sequences of behavior across multiple other microservices. Because direct messages have a direct response, this allows a single microservice to coordinate or orchestrate the activities of multiple other microservices.
-* It has the major drawback that it requires the tight coupling of the two microservices that are at either end of the communication. Often, we’d prefer to avoid the tight coupling between our microservices, and for that reason, we’ll make frequent use of indirect messaging instead of direct messaging.
+* Drawbacks:
+    * High coupling between microservices
+    * A message can be received by only 1 microservice at a time
+    * Single point of failure if the controlling microservice crashes
 * HTTP: Hypertext Transfer Protocol (HTTP) is used to send direct (or synchronous) messages from one microservice to another.
 
 
-**Indirect message/Asynchronous**: Messages are sent via an intermediary so that both sender and receiver of the messages don’t know which other microservice is involved. In the case of the sender, it doesn’t even know if any other microservice will receive the message at all! Because the receiver doesn’t know which microservice has sent the message, it can’t send a direct reply. This means that this style of communication can’t be applied in situations where a direct response is required for confirming success or failure. This method of communication losely couple the microservices
+**Indirect message/Asynchronous**: Messages are sent via an intermediary so that both sender and receiver of the messages don’t know which other microservice is involved. In the case of the sender, it doesn’t even know if any other microservice will receive the message at all! Because the receiver doesn’t know which microservice has sent the message, it can’t send a direct reply. 
 
-* RabbitMQ: RabbitMQ is the message queuing software that we’ll use to send indirect (or asynchronous) messages from one microservice to another.
+* Benefits:
+    * This method of communication losely couple the microservices. 
+    * It gives more control to the receiver. When the receiver is overwhelmed and has no capacity to accept new messages, it is free to just ignore these, letting those pile up in the queue until it is able to handle them.
 
-* amqplib: This npm package allows us to configure RabbitMQ and to send and receive messages from JavaScript
+* Drawbacks: this style of communication can’t be applied in situations where a direct response is required for confirming success or failure. 
+
+* RabbitMQ: RabbitMQ is the message queuing software that we’ll use to send indirect (or asynchronous) messages from one microservice to another. RabbitMQ allows us to decouple message senders from message receivers. A sender doesn’t know which, if any, other microservices will handle a message. RabbitMQ implements the Advanced Message Queueing Protocol (AMQP), which is an open standard for message-broker communication.
+
+* amqplib: RabbitMQ has libraries for all the popular programming languages. `amqplib` is npm package allows us to configure RabbitMQ and to send and receive messages with Nodejs
+
+* The message sender uses DNS to resolve the IP address of the RabbitMQ server. It then communicates with it to publish a message on a particular named queue or exchange. The receiver also uses DNS to locate the RabbitMQ server and communicate with it to retrieve the message from the queue. At no point do the sender and receiver communicate directly.
+
+### Use RabbitMQ
+
+1. Add rabbitmq container to docker-compose-dev
+2. Run `docker-compose -f docker-compose-dev.yml up --build`
+3. Access rabbitmq dashboard at `localhost:15672/#/queues` with username:guest, password:guest
+4. Install amqplib to each microservice that requires rabbitmq (history, video-streaming)
 
 
 

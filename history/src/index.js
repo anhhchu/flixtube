@@ -1,6 +1,7 @@
 const express = require("express");
 const mongodb = require("mongodb");
 const bodyParser = require('body-parser');
+const amqp = require("ampqlib");
 
 if (!process.env.DBHOST) {
     throw new Error("Please specify the databse host using environment variable DBHOST.");
@@ -10,8 +11,13 @@ if (!process.env.DBNAME) {
     throw new Error("Please specify the name of the database using environment variable DBNAME");
 }
 
+if (!process.env.RABBIT) {
+    throw new Error("Please specify the name of the database using environment variable RABBIT");
+}
+
 const DBHOST = process.env.DBHOST;
 const DBNAME = process.env.DBNAME;
+const RABBIT = process.env.RABBIT;
 
 //
 // Connect to the database.
@@ -24,9 +30,22 @@ function connectDb() {
 }
 
 //
+// Connect to the rabbitmq server.
+//
+function connectRabbit() {
+    console.log(`Connecting to RabbitMQ server at ${RABBIT}`)
+    return amqp.connect(RABBIT) 
+        .then (messagingConnection => {
+            console.log(`Connected to RabbitMQ`)
+            //create RabbitMQ messaging channel
+            return messagingConnection.createChannel();
+        });
+}
+
+//
 // Setup event handlers.
 //
-function setupHandlers(app, db) {
+function setupHandlers(app, db, messageChannel) {
 
     const videosCollection = db.collection("videos");
 

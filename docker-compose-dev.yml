@@ -1,5 +1,15 @@
 version: '3'
-services:  
+services: 
+  rabbit:
+    image: rabbitmq:3.8.1-management
+    container_name: rabbit
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    expose:
+      - "5672"
+      - "15672"
+    restart: always
   db:
     image: mongo:4.2.8 
     container_name: db
@@ -21,7 +31,7 @@ services:
       - PORT=80
       - HOST=4001
       - STORAGE_ACCOUNT_NAME=anhtestvideos
-      - STORAGE_ACCESS_KEY=MGRgfAEFJdYkvpbqF0H7k+awS90v+4FGVBhQg7zGfsVlzxBdeV6Kfr+VMrf+uWx2EcRsx4CHm0RW+ASthP9uMQ==
+      - STORAGE_ACCESS_KEY=
       - NODE-ENV=development
     restart: "no"
   video-streaming:
@@ -59,6 +69,7 @@ services:
     environment:
       - PORT=80
       - HOST=4003
+      - RABBIT=amqp://guest:guest@rabbit:5672
       - DBHOST=mongodb://db:27017
       - DBNAME=history
       - NODE-ENV=development
