@@ -1,4 +1,4 @@
-## Work with npm
+# Work with npm
 
 `node --version`: Checks that Node.js is installed; prints the version number.
 
@@ -14,7 +14,7 @@
 
 `npm run start:dev`: My personal convention for starting a Node.js project in development. I add this to the scripts in package.json. Typically, it runs something like nodemon to enable live reload of your code as you work on it.
 
-### 1. For dev environment
+## 1. For dev environment
 
 Install dependencies: `npm install`
 
@@ -22,7 +22,7 @@ Run the project: `node index.js`
 
 Run testing: `npm test`
 
-#### 1.1. Set up live reload
+## 1.1. Set up live reload
 
 `npm install --save-dev nodemon`
 
@@ -34,7 +34,7 @@ Run testing: `npm test`
 `npm run start:dev`: start the app in dev env after adding `start:dev` to package.json
 
 
-### 2. For prod environment
+## 2. For prod environment
 
 Install dependencies only for production env: `npm install --only=production`
 
@@ -43,11 +43,11 @@ When we run npm install `--only=production`, then the packages we install to hel
 Run the project in production mode: `npm start` after add `start` to package.json
 
 
-## Work with Docker
+# Work with Docker
 
-### 1. Docker image
+## 1. Docker image
 
-#### 1.1. Build Docker Images
+## 1.1. Build Docker Images
 
     docker build -t video-streaming --file Dockerfile .
 
@@ -57,7 +57,7 @@ Run the project in production mode: `npm start` after add `start` to package.jso
 * *The --file argument specifies the name of the Dockerfile to use.*
 * *The dot `.`*: It tells the build command to operate against the current directory.
 
-#### 1.2. Publish Docker Image to Cloud Registry
+## 1.2. Publish Docker Image to Cloud Registry
 
 * Create Container Registry on Azure
 
@@ -73,13 +73,13 @@ Run the project in production mode: `npm start` after add `start` to package.jso
 
 * test with `docker run`
 
-#### 1.3. Remove Docker Image
+## 1.3. Remove Docker Image
 
     docker rmi <your-image-id> --force
 
 * Use --force to remove all tagged versions of an image these are all removed.
 
-### 2. Docker Container
+## 2. Docker Container
 
 Instantiate docker image as a container to run the app
 
@@ -118,7 +118,7 @@ Restart a container
 
     docker restart <container-name>
 
-### 3. Docker Compose
+## 3. Docker Compose
 
 https://docs.docker.com/compose/compose-file/compose-file-v3/
 
@@ -147,7 +147,7 @@ Run docker-compose with separate files for dev and prod
 
 
 
-### 4. Add sercret using Docker Swarm Stack
+## 4. Add sercret using Docker Swarm Stack
 
 https://www.rockyourcode.com/using-docker-secrets-with-docker-compose/
 
@@ -159,24 +159,26 @@ https://www.rockyourcode.com/using-docker-secrets-with-docker-compose/
 
 
 
-## Work with Database and Storage
+# Work with Database and Storage
 
-### 1. Install `mongodb` in video-streaming microservice
+## 1. Install `mongodb` in video-streaming microservice
     
     npm install --save mongodb
 
-### 2. Run docker-compose to start all services
+## 2. Run docker-compose to start all services
 
-### 3. connect to mongodb on host:4000
+## 3. connect to mongodb on host:4000
 create video-streaming db, videos collection
 add video-record
 
-### 4. check video-streaming localhost
+## 4. check video-streaming localhost
 
     http://localhost:4002/video?id=5d9e690ad76fe06a3d7ae416
 
 
-## Communication between microservices
+# Communication between microservices
+
+## 1. Direct messaging/Synchronous
 
 **Direct messaging/Synchronous**: Direct messaging means that one microservice directly sends a message to another microservice and then receives an immediate and direct response. Direct messaging is used when we’d like one microservice to directly message a particular microservice and immediately invoke an action or task within it. The recipient microservice can’t ignore or avoid the incoming message. If it were to do so, the sender will know about it directly from the response.
 * A potential benefit of direct messaging is the ability to have one controller microservice that can orchestrate complex sequences of behavior across multiple other microservices. Because direct messages have a direct response, this allows a single microservice to coordinate or orchestrate the activities of multiple other microservices.
@@ -186,6 +188,8 @@ add video-record
     * Single point of failure if the controlling microservice crashes
 * HTTP: Hypertext Transfer Protocol (HTTP) is used to send direct (or synchronous) messages from one microservice to another.
 
+
+## 2. Indirect message/Asynchronous
 
 **Indirect message/Asynchronous**: Messages are sent via an intermediary so that both sender and receiver of the messages don’t know which other microservice is involved. In the case of the sender, it doesn’t even know if any other microservice will receive the message at all! Because the receiver doesn’t know which microservice has sent the message, it can’t send a direct reply. 
 
@@ -201,13 +205,30 @@ add video-record
 
 * The message sender uses DNS to resolve the IP address of the RabbitMQ server. It then communicates with it to publish a message on a particular named queue or exchange. The receiver also uses DNS to locate the RabbitMQ server and communicate with it to retrieve the message from the queue. At no point do the sender and receiver communicate directly.
 
-### Use RabbitMQ
+### 2.1 Use RabbitMQ for Indirect messaging
 
 1. Add rabbitmq container to docker-compose-dev
 2. Run `docker-compose -f docker-compose-dev.yml up --build`
 3. Access rabbitmq dashboard at `localhost:15672/#/queues` with username:guest, password:guest
-4. Install amqplib to each microservice that requires rabbitmq (history, video-streaming)
+4. Install amqplib to each microservice that requires rabbitmq:
+    * history service: receiving message
+    * video-streaming service: sending message
 
+Use `npm install --save wait-port` to wait for RabbitMQ to start before running the history and video streaming microservice
+
+Add `npx wait-port rabbit:5672` to history and video-streaming Dockerfile CMD: Uses npx to invoke the locally installed wait-port command to wait until the server at hostname rabbit is accepting connections on port 5672
+
+### 2.2 Single-receipient indirect messaging
+
+ Single-recipient messages are one-to-one : a message is sent from one microservice and received by only a single other. This is a great way of making sure that a particular job is done only once within your application.
+
+ 'Assert queue': checking for the existence of the queue and then only creating it when it doesn’t already exist. The queue is created once and shared between all participating microservices
+
+ RabbitMQ is agnostic about the format of the message payload, so it doesn’t natively support JSON. We must therefore manually parse the incoming message payload.
+
+### 2.3 Multiple-receipient indirect messaging
+
+NOTE Multiple-recipient messages are one-to-many : a message is sent from only a single microservice but potentially received by many others. This is a great way of publishing notifications within your application.
 
 
 
