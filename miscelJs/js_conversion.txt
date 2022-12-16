@@ -15,4 +15,5 @@ undefined + 1 = NaN
 
 * null becomes 0 after the numeric conversion.
 * undefined becomes NaN after the numeric conversion.
-* Space characters are trimmed off string start and end when a string is converted to a number. Here the whole string consists of space characters, such as \t, \n and a “regular” space between them. So, similarly to an empty string, it becomes 0
+* Space characters are trimmed off string start and end when a string is converted to a number.
+# Here the whole string consists of space characters, such as \t, \n and a “regular” space between them. So, similarly to an empty string, it becomes 0

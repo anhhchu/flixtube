@@ -9,4 +9,5 @@ RUN npm install --only=production
 COPY ./src ./src 
 # COPY ./videos ./videos
 #  sets the command that is invoked when our container is instantiated.
-CMD npm start
+CMD npx wait-port rabbit:5672 && \
+    npm start
