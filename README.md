@@ -218,7 +218,7 @@ Use `npm install --save wait-port` to wait for RabbitMQ to start before running 
 
 Add `npx wait-port rabbit:5672` to history and video-streaming Dockerfile CMD: Uses npx to invoke the locally installed wait-port command to wait until the server at hostname rabbit is accepting connections on port 5672
 
-### 2.2 Single-receipient indirect messaging
+### 2.2 Single-recipient indirect messaging
 
  Single-recipient messages are one-to-one : a message is sent from one microservice and received by only a single other. This is a great way of making sure that a particular job is done only once within your application.
 
@@ -226,7 +226,7 @@ Add `npx wait-port rabbit:5672` to history and video-streaming Dockerfile CMD: U
 
  RabbitMQ is agnostic about the format of the message payload, so it doesn’t natively support JSON. We must therefore manually parse the incoming message payload.
 
-### 2.3 Multiple-receipient indirect messaging
+### 2.3 Multiple-recipient indirect messaging
 
 NOTE Multiple-recipient messages are one-to-many : a message is sent from only a single microservice but potentially received by many others. This is a great way of publishing notifications within your application.
 
