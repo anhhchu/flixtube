@@ -1,4 +1,4 @@
-# Work with npm
+# npm
 
 `node --version`: Checks that Node.js is installed; prints the version number.
 
@@ -43,11 +43,19 @@ When we run npm install `--only=production`, then the packages we install to hel
 Run the project in production mode: `npm start` after add `start` to package.json
 
 
-# Work with Docker
+# Docker
 
 ## 1. Docker image
 
 ## 1.1. Build Docker Images
+
+Follow this for docker image build on Mac M1: 
+
+[How to Actually Deploy Docker Images Built on M1 Macs With Apple Silicon](https://betterprogramming.pub/how-to-actually-deploy-docker-images-built-on-a-m1-macs-with-apple-silicon-a35e39318e97)
+
+[Docker, M1 Macs and EKS issue: exec format error](https://blog.ccavazos.co/posts/m1-docker-eks)
+
+[standard_init_linux.go:228: exec user process caused: exec format error](https://akashmittal.com/docker-exec-format-error/)
 
     docker build -t video-streaming --file Dockerfile .
 
@@ -63,13 +71,13 @@ Run the project in production mode: `npm start` after add `start` to package.jso
 
 * authenticate with `docker login`
 
-      docker login <cr url> --username <user> --password <password>
+    docker login <cr url> --username <user> --password <password>
 
 * publish `docker push`
 
-        docker tag <existing-image> <registry-url>/<image-name-registry>:<version>
+    docker tag <existing-image> <registry-url>/<image-name-registry>:<version>
 
-        docker push <registry-url>/<image-name-registry>:<version>
+    docker push <registry-url>/<image-name-registry>:<version>
 
 * test with `docker run`
 
@@ -118,6 +126,12 @@ Restart a container
 
     docker restart <container-name>
 
+Check logs 
+
+    kubectl -n default logs <pod-name> > pod.log
+
+    kubectl describe pod <pod-name>
+
 ## 3. Docker Compose
 
 https://docs.docker.com/compose/compose-file/compose-file-v3/
@@ -159,19 +173,19 @@ https://www.rockyourcode.com/using-docker-secrets-with-docker-compose/
 
 
 
-# Work with Database and Storage
+# Database and Storage
 
-## 1. Install `mongodb` in video-streaming microservice
+1. Install `mongodb` in video-streaming microservice
     
     npm install --save mongodb
 
-## 2. Run docker-compose to start all services
+2. Run docker-compose to start all services
 
-## 3. connect to mongodb on host:4000
+3. connect to mongodb on host:4000
 create video-streaming db, videos collection
 add video-record
 
-## 4. check video-streaming localhost
+4. check video-streaming localhost
 
     http://localhost:4002/video?id=5d9e690ad76fe06a3d7ae416
 
@@ -218,7 +232,7 @@ Use `npm install --save wait-port` to wait for RabbitMQ to start before running 
 
 Add `npx wait-port rabbit:5672` to history and video-streaming Dockerfile CMD: Uses npx to invoke the locally installed wait-port command to wait until the server at hostname rabbit is accepting connections on port 5672
 
-### 2.2 Single-recipient indirect messaging
+### 2.2 Single-receipient indirect messaging
 
  Single-recipient messages are one-to-one : a message is sent from one microservice and received by only a single other. This is a great way of making sure that a particular job is done only once within your application.
 
@@ -226,9 +240,88 @@ Add `npx wait-port rabbit:5672` to history and video-streaming Dockerfile CMD: U
 
  RabbitMQ is agnostic about the format of the message payload, so it doesn’t natively support JSON. We must therefore manually parse the incoming message payload.
 
-### 2.3 Multiple-recipient indirect messaging
+### 2.3 Multiple-receipient indirect messaging
 
 NOTE Multiple-recipient messages are one-to-many : a message is sent from only a single microservice but potentially received by many others. This is a great way of publishing notifications within your application.
+
+
+# Azure AKS
+
+## Azure CLI
+
+`https://learn.microsoft.com/en-us/cli/azure/group?view=azure-cli-latest`
+
+    az login
+
+    az account set --subscription=<subscription-id>
+
+    az account show
+
+    az account list -o table
+
+    # Create a service principal with azure RBAC
+
+    az ad sp create-for-rbac --name "AnhFlixtube" --role="Contributor" --scopes="/subscriptions/<subscriptionid>/resourceGroups/<rg>"
+
+    # Check the version number for AKS
+
+    az aks get-versions --location westus -o table : 
+    
+    # Creates Kubectl config file at `~/.kube/config`
+
+    az aks get-credentials --resource-group <rg> --name <cluster>
+
+
+## Terraform
+
+    terraform init
+
+    terraform apply
+
+    terraform apply -auto-approve
+
+    terraform apply -var="key=value" -auto-approve
+
+    terraform destroy
+
+## Kubernetes
+
+### kubectl
+
+    kubectl version
+
+    kubectl get nodes : show list of nodes
+
+    kubectl get pods --all-namespaces
+
+    kubectl get pods -n <NAMESPACE>
+
+    kubectl get services
+
+### K8s dashboard
+
+    # Install
+    kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.4/aio/deploy/recommended.yaml
+
+    # Use Kubectl to create a proxy that allows us to access the dashboard from our development workstation:
+    
+    kubectl proxy
+
+    kubectl proxy --address=0.0.0.0
+
+    # access k8s dashboard -> not working as expected (404 error)
+
+    http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/
+
+    # check status of the dashboard pods
+
+    kubectl -n kubernetes-dashboard describe pod kubernetes-dashboard-7c89d9f89c-hnsvq
+
+    # check logs
+
+    kubectl -n kubernetes-dashboard logs <POD_NAME>
+
+
 
 
 
